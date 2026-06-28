@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EcoMap
 
-## Getting Started
+**Tu red de colaboradores, visualizada como realmente es: no quién conoces, sino qué tan cerca estás de cada uno.**
 
-First, run the development server:
+EcoMap es una plataforma web de mapeo de colaboradores para organizaciones. Visualiza tu red mediante un grafo donde la distancia y el tamaño de cada nodo refleja la intensidad real de la relación basada en múltiples parámetros.
+
+## 🚀 Stack Tecnológico
+
+- **Framework**: Next.js 15 (App Router) + TypeScript
+- **Base de Datos**: Neon PostgreSQL + Prisma ORM
+- **Autenticación**: NextAuth.js v5 (Google OAuth)
+- **UI**: Tailwind CSS + shadcn/ui
+- **Visualización**: React Flow (grafo interactivo)
+- **Geocodificación**: Google Places API
+- **Importación**: XLSX (SheetJS)
+- **Deployment**: Vercel
+
+## 📋 Prerequisitos
+
+- Node.js 18+ instalado
+- pnpm instalado (`npm install -g pnpm`)
+- Cuenta en [Neon](https://neon.tech) para PostgreSQL
+- Cuenta en [Google Cloud Console](https://console.cloud.google.com)
+- Cuenta en [Vercel](https://vercel.com) (opcional, para deployment)
+
+## 🛠️ Configuración Inicial
+
+### 1. Clonar e instalar dependencias
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd ecomap
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configurar Base de Datos (Neon PostgreSQL)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Ve a [neon.tech](https://neon.tech) y crea una cuenta
+2. Crea un nuevo proyecto llamado "ecomap-production"
+3. Copia el connection string (DATABASE_URL)
+4. Pégalo en tu archivo `.env`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Configurar Google OAuth
 
-## Learn More
+1. Ve a [Google Cloud Console](https://console.cloud.google.com)
+2. Crea un nuevo proyecto o selecciona uno existente
+3. Habilita la **Google+ API**
+4. Ve a "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
+5. Tipo de aplicación: **Web application**
+6. Authorized redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google` (desarrollo)
+   - `https://tudominio.com/api/auth/callback/google` (producción)
+7. Copia el Client ID y Client Secret
+8. Añádelos a tu `.env`
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Configurar Google Places API
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. En Google Cloud Console, habilita la **Places API**
+2. Ve a "Credentials" → "Create Credentials" → "API Key"
+3. Restringe la API key a Places API
+4. Añádela a tu `.env`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 5. Variables de Entorno
 
-## Deploy on Vercel
+Copia `.env.example` a `.env` y completa todas las variables:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+cp .env.example .env
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 6. Migrar la Base de Datos
+
+```bash
+pnpm prisma migrate dev --name init
+```
+
+Esto creará todas las tablas necesarias en tu base de datos Neon.
+
+### 7. Ejecutar en Desarrollo
+
+```bash
+pnpm dev
+```
+
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+
+## ✅ Fase 0 - Completada
+
+- ✓ Next.js 15 con TypeScript y Tailwind CSS
+- ✓ Prisma con schema completo
+- ✓ NextAuth.js v5 con Google OAuth
+- ✓ shadcn/ui components
+- ✓ Generador de plantilla Excel
+- ✓ Middleware de autenticación
+
+## 🔄 Próximos Pasos
+
+1. Configurar servicios externos (Neon, Google OAuth, Places API)
+2. Ejecutar primera migración de base de datos
+3. Implementar CRUD de organizaciones y colaboradores
+4. Implementar importación/exportación Excel
+5. Desarrollar visualización del grafo con React Flow
+
+---
+
+**Desarrollado para LaCabrera.eco**
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>

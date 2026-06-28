@@ -1,0 +1,17 @@
+// Ejemplo de schema para SQLite (desarrollo rápido)
+// Para usar:
+// 1. Copia este archivo a schema.prisma
+// 2. Cambia datasource db provider a "sqlite"
+// 3. Actualiza DATABASE_URL="file:./dev.db"
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Nota: En producción usa PostgreSQL
+// Este schema es solo para desarrollo local rápido
