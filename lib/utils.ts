@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import type { OrgRole } from "@prisma/client"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -38,4 +39,17 @@ export function getOrbitColor(orbit: string): string {
     PERIPHERY: 'text-gray-600 bg-gray-50',
   }
   return colors[orbit] || colors.PERIPHERY
+}
+
+export function getRoleBadgeColor(role: OrgRole): string {
+  const colors = {
+    ADMIN: 'bg-purple-100 text-purple-800',
+    EDITOR: 'bg-blue-100 text-blue-800',
+    VIEWER: 'bg-gray-100 text-gray-800',
+  }
+  return colors[role]
+}
+
+export function formatRole(role: OrgRole): string {
+  return role.charAt(0) + role.slice(1).toLowerCase()
 }

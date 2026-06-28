@@ -1,7 +1,7 @@
 import { OrgRole } from "@prisma/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { getRoleBadgeColor, formatRole } from "@/lib/org-utils"
+import { getRoleBadgeColor, formatRole } from "@/lib/utils"
 import { Users, Building2 } from "lucide-react"
 
 interface OrgCardProps {

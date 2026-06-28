@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { generateSlug } from "@/lib/utils"
 import { setCurrentOrgSlug } from "@/lib/org-utils"
-import { organizationSchema } from "@/lib/validations"
+import { organizationSchema, updateOrgSchema } from "@/lib/validations"
 
 export async function getUserOrganizations(userId: string) {
   return prisma.orgMember.findMany({
@@ -100,4 +100,57 @@ export async function selectOrganization(orgSlug: string) {
 
   await setCurrentOrgSlug(orgSlug)
   redirect(`/${orgSlug}`)
+}
+
+export async function updateOrganization(orgSlug: string, formData: FormData) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    redirect('/login')
+  }
+
+  // Get organization
+  const org = await prisma.organization.findUnique({
+    where: { slug: orgSlug },
+    include: {
+      members: {
+        where: { userId: session.user.id }
+      }
+    }
+  })
+
+  if (!org) {
+    throw new Error('Organization not found')
+  }
+
+  // Check if user is ADMIN
+  const membership = org.members[0]
+  if (!membership || membership.role !== 'ADMIN') {
+    throw new Error('Only admins can update organization settings')
+  }
+
+  const name = formData.get('name') as string
+  const description = formData.get('description') as string | null
+
+  // Validate
+  const result = updateOrgSchema.safeParse({
+    name: name || undefined,
+    description: description || undefined,
+  })
+
+  if (!result.success) {
+    return { error: result.error.issues[0].message }
+  }
+
+  // Update organization
+  await prisma.organization.update({
+    where: { id: org.id },
+    data: {
+      ...(name && { name }),
+      ...(description !== null && { description: description || null }),
+    }
+  })
+
+  revalidatePath(`/${orgSlug}/settings`)
+  revalidatePath(`/${orgSlug}`)
+  return { success: true }
 }
