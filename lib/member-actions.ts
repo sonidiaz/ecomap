@@ -39,7 +39,7 @@ export async function inviteMember(orgSlug: string, formData: FormData) {
 
   const validation = orgMemberSchema.safeParse({ email, role })
   if (!validation.success) {
-    throw new Error(validation.error.errors[0].message)
+    throw new Error(validation.error.issues[0].message)
   }
 
   // Check if user exists
