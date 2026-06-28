@@ -44,3 +44,10 @@ export const excelRowSchema = z.object({
   frecuencia_contacto: z.number().min(0).max(5).optional(),
   notas: z.string().optional(),
 })
+
+export const orgMemberSchema = z.object({
+  email: z.string().email('Invalid email'),
+  role: z.enum(['ADMIN', 'EDITOR', 'VIEWER']),
+})
+
+export const updateOrgSchema = organizationSchema.partial()
