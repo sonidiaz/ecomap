@@ -113,7 +113,7 @@ export default function NewOrganizationPage() {
               )}
 
               <div className="flex gap-3">
-                <Button type="submit" disabled={!name || isLoading} className="flex-1">
+                <Button variant="default" type="submit" disabled={!name || isLoading} className="flex-1">
                   {isLoading ? "Creando..." : "Crear Organización"}
                 </Button>
                 <Button type="button" variant="outline" asChild disabled={isLoading}>

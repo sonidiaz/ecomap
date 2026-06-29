@@ -52,7 +52,7 @@ export default async function OrganizationsPage() {
               Selecciona una organización para continuar
             </p>
           </div>
-          <Button asChild>
+          <Button variant="outline" size="sm" asChild>
             <Link href="/organizations/new">
               <Plus className="mr-2 h-4 w-4" />
               Nueva Organización
