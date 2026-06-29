@@ -187,7 +187,7 @@ export default async function OrgDashboard({ params }: OrgDashboardProps) {
                 </div>
               </div>
               <div className="mt-4 flex gap-3">
-                <Button asChild>
+                <Button variant="default" asChild>
                   <Link href={`/${orgSlug}/import`}>Importar Excel</Link>
                 </Button>
                 <Button variant="outline" asChild>

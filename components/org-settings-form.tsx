@@ -103,7 +103,7 @@ export function OrgSettingsForm({ org }: OrgSettingsFormProps) {
               </div>
             )}
 
-            <Button type="submit" disabled={loading}>
+            <Button className="text-white" type="submit" disabled={loading}>
               {loading ? 'Guardando...' : 'Guardar Cambios'}
             </Button>
           </form>

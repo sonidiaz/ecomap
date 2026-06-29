@@ -20,7 +20,7 @@ export default function LoginPage() {
             }}
             className="space-y-4"
           >
-            <Button type="submit" className="w-full" size="lg">
+            <Button type="submit" variant="default" className="w-full text-white" size="lg">
               <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
