@@ -23,6 +23,7 @@ import { distributeNodesOrbitally, getOrbitRingRadii } from "@/lib/orbital-layou
 interface NetworkGraphProps {
   collaborators: Collaborator[]
   proximityScores: ProximityScore[]
+  organizationName: string
 }
 
 const nodeTypes = {
@@ -30,7 +31,7 @@ const nodeTypes = {
   organizationCenter: OrganizationCenterNode,
 }
 
-export function NetworkGraph({ collaborators, proximityScores }: NetworkGraphProps) {
+export function NetworkGraph({ collaborators, proximityScores, organizationName }: NetworkGraphProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [orbitFilters, setOrbitFilters] = useState<Set<Orbit>>(
     new Set(['CORE', 'MID', 'PERIPHERY'])
@@ -56,7 +57,7 @@ export function NetworkGraph({ collaborators, proximityScores }: NetworkGraphPro
       id: 'org-center',
       type: 'organizationCenter',
       position: { x: centerX - 50, y: centerY - 50 }, // Offset para centrar (100px / 2)
-      data: { organizationName: 'Tu Org' },
+      data: { organizationName },
       draggable: false,
       selectable: false,
     }
