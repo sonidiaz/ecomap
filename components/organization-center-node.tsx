@@ -1,4 +1,5 @@
 import { memo } from "react"
+import { Building2 } from "lucide-react"
 
 interface OrganizationCenterNodeProps {
   data: {
@@ -24,7 +25,7 @@ function OrganizationCenterNodeComponent({ data }: OrganizationCenterNodeProps) 
       }}
     >
       {/* Icono de organización */}
-      <div className="text-3xl mb-1">🏢</div>
+      <Building2 className="w-8 h-8 text-blue-600 mb-1" />
 
       {/* Nombre de la organización */}
       <div className="text-[10px] font-bold text-blue-900 text-center px-2 leading-tight">
