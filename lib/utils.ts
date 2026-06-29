@@ -25,9 +25,9 @@ export function parseExcelTags(tagsString?: string): string[] {
 
 export function formatOrbit(orbit: string): string {
   const labels: Record<string, string> = {
-    CORE: 'Core',
-    MID: 'Mid',
-    PERIPHERY: 'Periphery',
+    CORE: 'Cercano',
+    MID: 'Medio',
+    PERIPHERY: 'Lejano',
   }
   return labels[orbit] || orbit
 }

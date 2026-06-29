@@ -24,9 +24,9 @@ export function GraphControls({
   totalCount,
 }: GraphControlsProps) {
   const orbits: { value: Orbit; label: string; color: string }[] = [
-    { value: 'CORE', label: 'Core', color: 'bg-green-500 hover:bg-green-600' },
-    { value: 'MID', label: 'Mid', color: 'bg-yellow-500 hover:bg-yellow-600' },
-    { value: 'PERIPHERY', label: 'Periphery', color: 'bg-gray-400 hover:bg-gray-500' },
+    { value: 'CORE', label: 'Cercano', color: 'bg-green-500 hover:bg-green-600' },
+    { value: 'MID', label: 'Medio', color: 'bg-yellow-500 hover:bg-yellow-600' },
+    { value: 'PERIPHERY', label: 'Lejano', color: 'bg-gray-400 hover:bg-gray-500' },
   ]
 
   return (

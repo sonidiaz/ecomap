@@ -51,7 +51,7 @@ function OrbitRingsOverlayComponent({ centerX, centerY, radii }: OrbitRingsOverl
         opacity="0.6"
         fontWeight="600"
       >
-        CORE
+        CERCANO
       </text>
 
       {/* Anillo MID (score 40-69) */}
@@ -73,7 +73,7 @@ function OrbitRingsOverlayComponent({ centerX, centerY, radii }: OrbitRingsOverl
         opacity="0.6"
         fontWeight="600"
       >
-        MID
+        MEDIO
       </text>
 
       {/* Anillo PERIPHERY (score < 40) */}
@@ -95,7 +95,7 @@ function OrbitRingsOverlayComponent({ centerX, centerY, radii }: OrbitRingsOverl
         opacity="0.6"
         fontWeight="600"
       >
-        PERIPHERY
+        LEJANO
       </text>
     </svg>
   )

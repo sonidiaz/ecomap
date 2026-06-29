@@ -116,9 +116,9 @@ export function generateTemplate(): Buffer {
     ['• Afinidad temática (tags): 0-15 puntos'],
     [''],
     ['ÓRBITAS:'],
-    ['• Core (>= 70 puntos): Colaboradores más cercanos'],
-    ['• Mid (40-69 puntos): Colaboradores medianamente cercanos'],
-    ['• Periphery (< 40 puntos): Colaboradores distantes'],
+    ['• Cercano (>= 70 puntos): Colaboradores más cercanos'],
+    ['• Medio (40-69 puntos): Colaboradores medianamente cercanos'],
+    ['• Lejano (< 40 puntos): Colaboradores distantes'],
   ])
 
   XLSX.utils.book_append_sheet(workbook, instructionsSheet, 'Instrucciones')
