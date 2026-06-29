@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-import type { OrgRole } from "@prisma/client"
+import type { OrgRole, Collaborator } from "@prisma/client"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -52,4 +52,25 @@ export function getRoleBadgeColor(role: OrgRole): string {
 
 export function formatRole(role: OrgRole): string {
   return role.charAt(0) + role.slice(1).toLowerCase()
+}
+
+// Helpers para el grafo de red
+export function getNodeSize(scoreTotal: number): number {
+  // Escala continua: mapear 0-100 a 35-75px
+  const MIN_SIZE = 35
+  const MAX_SIZE = 75
+  return MIN_SIZE + (scoreTotal / 100) * (MAX_SIZE - MIN_SIZE)
+}
+
+export function findSimilarCollaborators(
+  target: Collaborator,
+  all: Collaborator[]
+): Collaborator[] {
+  // Filtrar por tags compartidos
+  return all
+    .filter(c =>
+      c.id !== target.id &&
+      c.tags.some(tag => target.tags.includes(tag))
+    )
+    .slice(0, 5) // Top 5
 }
