@@ -21,10 +21,49 @@ interface GooglePlacesAutocompleteProps {
   disabled?: boolean
 }
 
+// Google Maps types
+interface GoogleAddressComponent {
+  long_name: string
+  short_name: string
+  types: string[]
+}
+
+interface GoogleGeometry {
+  location: {
+    lat: () => number
+    lng: () => number
+  }
+}
+
+interface GooglePlace {
+  formatted_address?: string
+  geometry?: GoogleGeometry
+  address_components?: GoogleAddressComponent[]
+}
+
+interface GoogleAutocomplete {
+  addListener: (event: string, callback: () => void) => void
+  getPlace: () => GooglePlace
+}
+
+interface GoogleMapsAPI {
+  maps: {
+    places: {
+      Autocomplete: new (
+        input: HTMLInputElement,
+        options?: { types?: string[]; fields?: string[] }
+      ) => GoogleAutocomplete
+    }
+    event: {
+      clearInstanceListeners: (instance: any) => void
+    }
+  }
+}
+
 // Extend window type for Google Maps
 declare global {
   interface Window {
-    google?: typeof google
+    google?: GoogleMapsAPI
     initGoogleMapsAutocomplete?: () => void
   }
 }
@@ -38,7 +77,7 @@ export function GooglePlacesAutocomplete({
   disabled = false
 }: GooglePlacesAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
+  const autocompleteRef = useRef<GoogleAutocomplete | null>(null)
   const [value, setValue] = useState(initialValue)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -107,7 +146,7 @@ export function GooglePlacesAutocomplete({
       let city: string | undefined
       let country: string | undefined
 
-      place.address_components?.forEach((component) => {
+      place.address_components?.forEach((component: GoogleAddressComponent) => {
         if (component.types.includes("locality")) {
           city = component.long_name
         }

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import type { Collaborator, ProximityScore } from "@prisma/client"
 import {
   Sheet,
@@ -9,9 +10,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { formatOrbit, findSimilarCollaborators } from "@/lib/utils"
-import { Building2, Mail, Phone, MapPin, Users } from "lucide-react"
+import { Building2, Mail, Phone, MapPin, Users, ExternalLink } from "lucide-react"
 
 interface NodeDetailsPanelProps {
   isOpen: boolean
@@ -19,6 +21,7 @@ interface NodeDetailsPanelProps {
   collaborator: Collaborator | null
   proximityScore: ProximityScore | null
   allCollaborators: Collaborator[]
+  orgSlug: string
 }
 
 export function NodeDetailsPanel({
@@ -27,6 +30,7 @@ export function NodeDetailsPanel({
   collaborator,
   proximityScore,
   allCollaborators,
+  orgSlug,
 }: NodeDetailsPanelProps) {
   if (!collaborator || !proximityScore) return null
 
@@ -206,6 +210,16 @@ export function NodeDetailsPanel({
               </div>
             </div>
           )}
+
+          {/* Action buttons */}
+          <div className="pt-6 border-t flex gap-3">
+            <Button asChild variant="default" className="flex-1">
+              <Link href={`/${orgSlug}/collaborators/${collaborator.id}`}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Ver Detalles Completos
+              </Link>
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>

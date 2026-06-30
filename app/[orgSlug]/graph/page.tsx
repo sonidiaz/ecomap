@@ -66,6 +66,7 @@ export default async function GraphPage({ params }: GraphPageProps) {
         collaborators={collaborators}
         proximityScores={proximityScores}
         organizationName={organizationName}
+        orgSlug={orgSlug}
       />
 
       {/* Indicador visual en desarrollo */}

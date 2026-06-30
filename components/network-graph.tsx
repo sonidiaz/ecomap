@@ -24,6 +24,7 @@ interface NetworkGraphProps {
   collaborators: Collaborator[]
   proximityScores: ProximityScore[]
   organizationName: string
+  orgSlug: string
 }
 
 const nodeTypes = {
@@ -31,7 +32,7 @@ const nodeTypes = {
   organizationCenter: OrganizationCenterNode,
 }
 
-export function NetworkGraph({ collaborators, proximityScores, organizationName }: NetworkGraphProps) {
+export function NetworkGraph({ collaborators, proximityScores, organizationName, orgSlug }: NetworkGraphProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [orbitFilters, setOrbitFilters] = useState<Set<Orbit>>(
     new Set(['CORE', 'MID', 'PERIPHERY'])
@@ -213,6 +214,7 @@ export function NetworkGraph({ collaborators, proximityScores, organizationName 
         collaborator={selectedCollaborator}
         proximityScore={selectedScore}
         allCollaborators={collaborators}
+        orgSlug={orgSlug}
       />
     </div>
   )
