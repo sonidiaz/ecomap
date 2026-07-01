@@ -3,6 +3,9 @@ import { prisma } from "@/lib/db"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Users, Building2, Upload, Settings, Network } from "lucide-react"
+import { StatCard } from "@/components/dashboard/stat-card"
+import { ActionCard } from "@/components/dashboard/action-card"
+import { DashboardGrid } from "@/components/dashboard/dashboard-grid"
 
 interface OrgDashboardProps {
   params: Promise<{
@@ -30,6 +33,70 @@ export default async function OrgDashboard({ params }: OrgDashboardProps) {
     return null // Layout handles not found
   }
 
+  // Configuración de stats (declarativo)
+  const stats = [
+    {
+      id: 'members',
+      label: 'Miembros',
+      value: org._count.members,
+      description: 'Usuarios con acceso',
+      icon: Users,
+    },
+    {
+      id: 'collaborators',
+      label: 'Colaboradores',
+      value: org._count.collaborators,
+      description: 'En tu red',
+      icon: Building2,
+    },
+    {
+      id: 'imports',
+      label: 'Importaciones',
+      value: org._count.importLogs,
+      description: 'Archivos procesados',
+      icon: Upload,
+    },
+  ]
+
+  // Configuración de acciones (declarativo)
+  const actions = [
+    {
+      id: 'collaborators',
+      title: 'Colaboradores',
+      description: 'Ver y gestionar tu red',
+      icon: Building2,
+      href: `/${orgSlug}/collaborators`,
+    },
+    {
+      id: 'graph',
+      title: 'Grafo de Red',
+      description: 'Visualiza las órbitas',
+      icon: Network,
+      href: `/${orgSlug}/graph`,
+    },
+    {
+      id: 'import',
+      title: 'Importar Excel',
+      description: 'Cargar colaboradores',
+      icon: Upload,
+      href: `/${orgSlug}/import`,
+    },
+    {
+      id: 'settings',
+      title: 'Configuración',
+      description: 'Ajustes y miembros',
+      icon: Settings,
+      href: `/${orgSlug}/settings`,
+    },
+    {
+      id: 'members',
+      title: 'Miembros',
+      description: 'Gestionar equipo',
+      icon: Users,
+      href: `/${orgSlug}/settings/members`,
+    },
+  ]
+
   return (
     <div className="p-8">
       <div className="mx-auto max-w-7xl space-y-8">
@@ -41,49 +108,14 @@ export default async function OrgDashboard({ params }: OrgDashboardProps) {
           )}
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Miembros</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{org._count.members}</div>
-              <p className="text-xs text-muted-foreground">
-                Usuarios con acceso
-              </p>
-            </CardContent>
-          </Card>
+        {/* Stats Cards - Modular */}
+        <DashboardGrid cols={{ base: 1, md: 3 }}>
+          {stats.map((stat) => (
+            <StatCard key={stat.id} {...stat} />
+          ))}
+        </DashboardGrid>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Colaboradores</CardTitle>
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{org._count.collaborators}</div>
-              <p className="text-xs text-muted-foreground">
-                En tu red
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Importaciones</CardTitle>
-              <Upload className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{org._count.importLogs}</div>
-              <p className="text-xs text-muted-foreground">
-                Archivos procesados
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
+        {/* Quick Actions - Modular */}
         <Card>
           <CardHeader>
             <CardTitle>Acciones Rápidas</CardTitle>
@@ -91,66 +123,12 @@ export default async function OrgDashboard({ params }: OrgDashboardProps) {
               Gestiona tu organización y colaboradores
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4" asChild>
-              <Link href={`/${orgSlug}/collaborators`}>
-                <Building2 className="h-6 w-6" />
-                <div className="text-left">
-                  <div className="font-semibold">Colaboradores</div>
-                  <div className="text-sm text-muted-foreground">
-                    Ver y gestionar tu red
-                  </div>
-                </div>
-              </Link>
-            </Button>
-
-            <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4" asChild>
-              <Link href={`/${orgSlug}/graph`}>
-                <Network className="h-6 w-6" />
-                <div className="text-left">
-                  <div className="font-semibold">Grafo de Red</div>
-                  <div className="text-sm text-muted-foreground">
-                    Visualiza las órbitas
-                  </div>
-                </div>
-              </Link>
-            </Button>
-
-            <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4" asChild>
-              <Link href={`/${orgSlug}/import`}>
-                <Upload className="h-6 w-6" />
-                <div className="text-left">
-                  <div className="font-semibold">Importar Excel</div>
-                  <div className="text-sm text-muted-foreground">
-                    Cargar colaboradores
-                  </div>
-                </div>
-              </Link>
-            </Button>
-
-            <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4" asChild>
-              <Link href={`/${orgSlug}/settings`}>
-                <Settings className="h-6 w-6" />
-                <div className="text-left">
-                  <div className="font-semibold">Configuración</div>
-                  <div className="text-sm text-muted-foreground">
-                    Ajustes y miembros
-                  </div>
-                </div>
-              </Link>
-            </Button>
-
-            <Button variant="outline" className="h-auto flex-col items-start gap-2 p-4" asChild>
-              <Link href={`/${orgSlug}/settings/members`}>
-                <Users className="h-6 w-6" />
-                <div className="text-left">
-                  <div className="font-semibold">Miembros</div>
-                  <div className="text-sm text-muted-foreground">
-                    Gestionar equipo
-                  </div>
-                </div>
-              </Link>
-            </Button>
+          <CardContent>
+            <DashboardGrid cols={{ base: 1, md: 2, lg: 3 }}>
+              {actions.map((action) => (
+                <ActionCard key={action.id} {...action} />
+              ))}
+            </DashboardGrid>
           </CardContent>
         </Card>
 
