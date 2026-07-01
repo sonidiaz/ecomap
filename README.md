@@ -83,25 +83,139 @@ pnpm dev
 
 Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-## ✅ Fase 0 - Completada
+## ✨ Funcionalidades Implementadas
 
-- ✓ Next.js 15 con TypeScript y Tailwind CSS
-- ✓ Prisma con schema completo
-- ✓ NextAuth.js v5 con Google OAuth
-- ✓ shadcn/ui components
+### 🏢 Gestión de Organizaciones
+- ✓ Crear y editar organizaciones con slug único
+- ✓ Sistema multi-organización (usuarios pueden pertenecer a múltiples orgs)
+- ✓ Perfil de organización con logo, descripción, ubicación y tags
+- ✓ Dashboard con estadísticas en tiempo real
+- ✓ Cambio rápido entre organizaciones
+
+### 👥 Gestión de Miembros
+- ✓ Sistema de roles (ADMIN, EDITOR, VIEWER) con permisos jerárquicos
+- ✓ Invitación de miembros por email
+- ✓ Cambio de roles inline
+- ✓ Remoción de miembros con validaciones (protege último ADMIN)
+- ✓ Vista de todos los miembros con información de acceso
+
+### 🤝 Gestión de Colaboradores
+- ✓ CRUD completo de colaboradores (crear, editar, ver, archivar, eliminar)
+- ✓ Tipos de colaborador (PERSON, ORGANIZATION, PROJECT)
+- ✓ Geocodificación automática de direcciones con Google Places API
+- ✓ Sistema de tags personalizable
+- ✓ Tracking de colaboración activa/pasada
+- ✓ Escala de frecuencia de contacto (0-5)
+- ✓ Archivado suave (soft delete) de colaboradores
+- ✓ Búsqueda con debounce por nombre, email, empresa o tags
+- ✓ Importación masiva vía Excel con validación y reporte de errores
+
+### 📊 Sistema de Proximity Scoring
+- ✓ Cálculo automático de proximidad basado en múltiples factores:
+  - Colaboración activa (peso configurable)
+  - Colaboración pasada (peso configurable)
+  - Proximidad geográfica (distancia)
+  - Frecuencia de contacto
+  - Afinidad temática (tags compartidos)
+- ✓ Clasificación en órbitas: CORE (≥70), MID (40-69), PERIPHERY (<40)
+- ✓ Recalculación automática al actualizar datos relevantes
+
+### 🌐 Visualización del Grafo de Red
+- ✓ Grafo interactivo con React Flow
+- ✓ Layout orbital basado en proximity scores
+- ✓ Nodos escalados según importancia
+- ✓ Colores por órbita (CORE: amarillo, MID: verde, PERIPHERY: azul)
+- ✓ Toggle entre datos mock y datos reales para desarrollo
+- ✓ Nodo central de la organización
+- ✓ Zoom, pan y navegación interactiva
+
+### 📥 Importación y Exportación
+- ✓ Importación masiva desde Excel (.xlsx)
+- ✓ Validación de datos con reportes detallados
+- ✓ Logs de importación con estadísticas (total, importados, omitidos)
 - ✓ Generador de plantilla Excel
-- ✓ Middleware de autenticación
+- ✓ Geocodificación automática durante importación
+
+### 🎨 UI/UX
+- ✓ Dashboard modular con componentes reutilizables
+- ✓ Diseño responsive (móvil, tablet, desktop)
+- ✓ Tema consistente con paleta de colores corporativa
+- ✓ Componentes skeleton para estados de carga
+- ✓ Feedback con toasts y confirmaciones
+- ✓ Navegación por breadcrumbs
+
+## 📁 Estructura del Proyecto
+
+```
+ecomap/
+├── app/
+│   ├── [orgSlug]/              # Rutas dinámicas por organización
+│   │   ├── collaborators/      # CRUD de colaboradores
+│   │   ├── graph/              # Visualización del grafo
+│   │   ├── import/             # Importación Excel
+│   │   ├── settings/           # Configuración y miembros
+│   │   └── page.tsx            # Dashboard de organización
+│   ├── organizations/          # Listado y creación de orgs
+│   └── (auth)/login/           # Página de login
+├── components/
+│   ├── dashboard/              # Componentes modulares del dashboard
+│   ├── ui/                     # shadcn/ui components
+│   └── *.tsx                   # Componentes específicos
+├── lib/
+│   ├── *-actions.ts            # Server Actions (org, member, collaborator, etc.)
+│   ├── validations.ts          # Schemas de validación Zod
+│   ├── auth.ts                 # Configuración NextAuth
+│   └── db.ts                   # Cliente Prisma
+├── prisma/
+│   └── schema.prisma           # Modelos de datos
+└── types/
+    └── index.ts                # Tipos TypeScript
+```
+
+## 🗄️ Modelos de Datos Principales
+
+- **Organization**: Datos de la organización (nombre, slug, logo, ubicación, tags)
+- **User**: Usuarios autenticados con NextAuth
+- **OrgMember**: Relación many-to-many entre Users y Organizations (con rol)
+- **Collaborator**: Contactos/colaboradores de cada organización
+- **ProximityScore**: Scoring calculado para cada colaborador (con órbita)
+- **ImportLog**: Registro de importaciones Excel con estadísticas
+
+## 🚀 Flujo de Usuario
+
+1. **Login** → Autenticación con Google OAuth
+2. **Seleccionar/Crear Organización** → Vista de todas las organizaciones del usuario
+3. **Dashboard** → Estadísticas y acciones rápidas
+4. **Gestionar Colaboradores** → CRUD manual o importación Excel
+5. **Invitar Miembros** → Añadir usuarios al equipo con roles
+6. **Visualizar Grafo** → Ver red de colaboradores en órbitas
+7. **Configurar Organización** → Editar perfil y gestionar equipo
 
 ## 🔄 Próximos Pasos
 
-1. Configurar servicios externos (Neon, Google OAuth, Places API)
-2. Ejecutar primera migración de base de datos
-3. Implementar CRUD de organizaciones y colaboradores
-4. Implementar importación/exportación Excel
-5. Desarrollar visualización del grafo con React Flow
+1. **Sistema de invitaciones por enlace/código** (en planificación)
+   - Generar enlaces compartibles con roles preconfigurados
+   - Links con caducidad y límite de usos
+   - Gestión de invites activos y revocación
+
+2. **Exportación a Excel** de colaboradores con filtros
+
+3. **Filtros avanzados en el grafo**
+   - Por órbita, tags, tipo de colaborador
+   - Búsqueda en tiempo real en el grafo
+
+4. **Edición inline de colaboradores** desde el grafo
+
+5. **Notificaciones por email**
+   - Invitaciones a organizaciones
+   - Cambios de rol
+   - Reportes periódicos
+
+6. **Analytics y reportes**
+   - Evolución de la red en el tiempo
+   - Estadísticas de colaboración
+   - Exportación de reportes PDF
 
 ---
 
 **Desarrollado para LaCabrera.eco**
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
