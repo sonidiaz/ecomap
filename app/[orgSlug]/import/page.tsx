@@ -206,10 +206,6 @@ export default function ImportPage() {
     }
   }
 
-  const downloadTemplate = () => {
-    window.open('/api/template', '_blank')
-  }
-
   return (
     <div className="p-8">
       <div className="mx-auto max-w-4xl space-y-8">
@@ -237,14 +233,11 @@ export default function ImportPage() {
                 <p className="text-sm text-muted-foreground">
                   Usa nuestra plantilla Excel con el formato correcto
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={downloadTemplate}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Descargar Plantilla
+                <Button variant="outline" size="sm" className="mt-2" asChild>
+                  <a href="/api/template" download="ecomap-plantilla-colaboradores.xlsx">
+                    <Download className="mr-2 h-4 w-4" />
+                    Descargar Plantilla
+                  </a>
                 </Button>
               </div>
             </div>
