@@ -78,8 +78,8 @@ export function distributeNodesOrbitally(
     const groupAngleSpan = anglePerNode * group.length
 
     group.forEach((item, index) => {
-      // Ángulo base + pequeño jitter aleatorio (±5°)
-      const jitter = (Math.random() - 0.5) * (5 * Math.PI / 180)
+      // Ángulo base + pequeño jitter determinista (±5°), estable entre servidor y cliente
+      const jitter = (seededRandom(item.collab.id) - 0.5) * (5 * Math.PI / 180)
       const angle = currentAngle + (anglePerNode * index) + jitter
 
       // Calcular tamaño primero
@@ -132,6 +132,20 @@ export function getOrbitRingRadii(
     core: coreRadius,      // ~232px
     midInner: midInnerRadius // ~280px
   }
+}
+
+/**
+ * Genera un valor pseudo-aleatorio determinista en [0, 1) a partir de un id.
+ * Evita usar Math.random() en el cálculo de layout, que se ejecuta tanto en
+ * el render de servidor como en el de cliente y provocaría un hydration mismatch.
+ */
+function seededRandom(seed: string): number {
+  let hash = 0
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i)
+    hash |= 0
+  }
+  return (hash >>> 0) / 0xffffffff
 }
 
 /**
