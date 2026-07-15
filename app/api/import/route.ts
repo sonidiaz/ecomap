@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { excelRowSchema } from '@/lib/validations'
 import { geocodeAddress } from '@/lib/geocoding'
 import { calculateProximityScore } from '@/lib/proximity-score'
-import * as XLSX from 'xlsx'
+import { parseWorkbook, parseRow, mapCollaboratorType } from '@/lib/import-service'
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,12 +52,7 @@ export async function POST(req: NextRequest) {
     // Leer archivo Excel
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-    const workbook = XLSX.read(buffer, { type: 'buffer' })
-
-    // Leer primera hoja
-    const sheetName = workbook.SheetNames[0]
-    const worksheet = workbook.Sheets[sheetName]
-    const rawData = XLSX.utils.sheet_to_json(worksheet)
+    const rawData = parseWorkbook(buffer)
 
     if (rawData.length === 0) {
       return NextResponse.json(
@@ -70,95 +64,73 @@ export async function POST(req: NextRequest) {
     // Procesar filas
     const results = {
       total: rawData.length,
-      imported: 0,
+      created: 0,
+      updated: 0,
+      warnings: 0,
       skipped: 0,
       errors: [] as Array<{ row: number; error: string }>,
     }
 
     for (let i = 0; i < rawData.length; i++) {
-      const rowIndex = i + 2 // +2 porque la fila 1 son headers
-      const row = rawData[i] as any
+      const parsed = parseRow(rawData[i], i)
+
+      if (parsed.error || !parsed.data) {
+        results.skipped++
+        results.errors.push({ row: parsed.row, error: parsed.error || 'Fila inválida' })
+        continue
+      }
+
+      const validatedRow = parsed.data
 
       try {
-        // Validar fila con Zod
-        const validatedRow = excelRowSchema.parse({
-          nombre: row['nombre*'] || row['nombre'],
-          email: row['email*'] || row['email'],
-          direccion: row['direccion*'] || row['direccion'],
-          empresa: row['empresa'] || undefined,
-          tipo: row['tipo'] || undefined,
-          tags: row['tags'] || undefined,
-          colaboracion_activa: parseBoolean(row['colaboracion_activa']),
-          colaboracion_pasada: parseBoolean(row['colaboracion_pasada']),
-          frecuencia_contacto: parseNumber(row['frecuencia_contacto'], 0),
-          notas: row['notas'] || undefined,
+        // Colaborador existente (para decidir si es alta o actualización, y si hace falta re-geocodificar)
+        const existing = await prisma.collaborator.findUnique({
+          where: { orgId_email: { orgId: org.id, email: validatedRow.email } },
         })
 
-        // Geocodificar dirección
-        const geoResult = await geocodeAddress(validatedRow.direccion)
+        // Geocodificar solo si es nuevo o si la dirección cambió (evita quemar cuota de Google Places)
+        let geoResult: Awaited<ReturnType<typeof geocodeAddress>> = null
+        let addressWarning = false
+        if (!existing || existing.address !== validatedRow.direccion) {
+          geoResult = await geocodeAddress(validatedRow.direccion)
+          if (!geoResult) addressWarning = true
+        }
 
-        // Parsear tags
-        const tags = validatedRow.tags
-          ? validatedRow.tags.split(',').map(t => t.trim()).filter(Boolean)
-          : []
-
-        // Mapear tipo
         const type = mapCollaboratorType(validatedRow.tipo)
 
         // Calcular proximity score
         const scoreResult = calculateProximityScore({
-          collabActive: validatedRow.colaboracion_activa || false,
-          collabPast: validatedRow.colaboracion_pasada || false,
-          contactFrequency: validatedRow.frecuencia_contacto || 0,
+          collabActive: validatedRow.colaboracion_activa,
+          collabPast: validatedRow.colaboracion_pasada,
+          contactFrequency: validatedRow.frecuencia_contacto,
           orgLat: org.lat || undefined,
           orgLng: org.lng || undefined,
-          collabLat: geoResult?.lat,
-          collabLng: geoResult?.lng,
+          collabLat: geoResult?.lat ?? existing?.lat ?? undefined,
+          collabLng: geoResult?.lng ?? existing?.lng ?? undefined,
           orgTags: org.tags,
-          collabTags: tags,
+          collabTags: validatedRow.tags,
         })
 
-        // Crear o actualizar colaborador (upsert por email único)
+        const baseData = {
+          name: validatedRow.nombre,
+          address: validatedRow.direccion,
+          type,
+          company: validatedRow.empresa,
+          tags: validatedRow.tags,
+          notes: validatedRow.notas,
+          collabActive: validatedRow.colaboracion_activa,
+          collabPast: validatedRow.colaboracion_pasada,
+          contactFrequency: validatedRow.frecuencia_contacto,
+          ...(geoResult
+            ? { city: geoResult.city, country: geoResult.country, lat: geoResult.lat, lng: geoResult.lng }
+            : {}),
+        }
+
+        // Crear o actualizar colaborador (upsert por email único = modo merge)
         const collaborator = await prisma.collaborator.upsert({
-          where: {
-            orgId_email: {
-              orgId: org.id,
-              email: validatedRow.email,
-            },
-          },
-          create: {
-            orgId: org.id,
-            name: validatedRow.nombre,
-            email: validatedRow.email,
-            address: validatedRow.direccion,
-            city: geoResult?.city,
-            country: geoResult?.country,
-            lat: geoResult?.lat,
-            lng: geoResult?.lng,
-            type,
-            company: validatedRow.empresa,
-            tags,
-            notes: validatedRow.notas,
-            collabActive: validatedRow.colaboracion_activa || false,
-            collabPast: validatedRow.colaboracion_pasada || false,
-            contactFrequency: validatedRow.frecuencia_contacto || 0,
-          },
-          update: {
-            name: validatedRow.nombre,
-            address: validatedRow.direccion,
-            city: geoResult?.city,
-            country: geoResult?.country,
-            lat: geoResult?.lat,
-            lng: geoResult?.lng,
-            type,
-            company: validatedRow.empresa,
-            tags,
-            notes: validatedRow.notas,
-            collabActive: validatedRow.colaboracion_activa || false,
-            collabPast: validatedRow.colaboracion_pasada || false,
-            contactFrequency: validatedRow.frecuencia_contacto || 0,
-            updatedAt: new Date(),
-          },
+          where: { orgId_email: { orgId: org.id, email: validatedRow.email } },
+          create: { orgId: org.id, email: validatedRow.email, ...baseData },
+          update: { ...baseData, updatedAt: new Date() },
         })
 
         // Crear o actualizar score
@@ -189,12 +161,17 @@ export async function POST(req: NextRequest) {
           },
         })
 
-        results.imported++
+        if (existing) {
+          results.updated++
+        } else {
+          results.created++
+        }
+        if (addressWarning) results.warnings++
       } catch (error: any) {
-        console.error(`Error processing row ${rowIndex}:`, error)
+        console.error(`Error processing row ${parsed.row}:`, error)
         results.skipped++
         results.errors.push({
-          row: rowIndex,
+          row: parsed.row,
           error: error.message || 'Error desconocido',
         })
       }
@@ -207,7 +184,7 @@ export async function POST(req: NextRequest) {
         userId: session.user.id,
         filename: file.name,
         rowsTotal: results.total,
-        rowsImported: results.imported,
+        rowsImported: results.created + results.updated,
         rowsSkipped: results.skipped,
         errorDetails: results.errors.length > 0 ? JSON.parse(JSON.stringify(results.errors)) : null,
       },
@@ -224,28 +201,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     )
   }
-}
-
-// Helpers
-function parseBoolean(value: any): boolean | undefined {
-  if (value === undefined || value === null || value === '') return undefined
-  if (typeof value === 'boolean') return value
-  const str = String(value).toLowerCase().trim()
-  if (str === 'true' || str === '1' || str === 'yes' || str === 'si' || str === 'sí') return true
-  if (str === 'false' || str === '0' || str === 'no') return false
-  return undefined
-}
-
-function parseNumber(value: any, defaultValue: number): number {
-  if (value === undefined || value === null || value === '') return defaultValue
-  const num = Number(value)
-  return isNaN(num) ? defaultValue : num
-}
-
-function mapCollaboratorType(tipo?: string): 'PERSON' | 'ORGANIZATION' | 'PROJECT' {
-  if (!tipo) return 'PERSON'
-  const normalized = tipo.toLowerCase().trim()
-  if (normalized === 'organization' || normalized === 'organización') return 'ORGANIZATION'
-  if (normalized === 'project' || normalized === 'proyecto') return 'PROJECT'
-  return 'PERSON'
 }
